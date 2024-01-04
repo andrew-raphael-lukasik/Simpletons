@@ -1,0 +1,17 @@
+{
+  "name": "com.andrewraphaellukasik.simpletons",
+  "author": {
+    "name": "Andrzej Rafa\u0142 \u0141ukasik",
+    "email": "andrew.r.lukasik@gmail.com",
+    "url": "https://github.com/andrew-raphael-lukasik"
+  },
+  "displayName": "Simpletons",
+  "version": "2024.1.4",
+  "unity": "2017.1",
+  "documentationUrl": "https://github.com/andrew-raphael-lukasik/simpletons",
+  "keywords": [
+    "ai",
+    "fsm"
+  ],
+  "hideInEditor": true
+}
