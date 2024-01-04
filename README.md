@@ -2,13 +2,15 @@
 
 A basic state machine for programmers to prototype Unity AI nav agents in C#.
 
+## Implementation
+
 ```cs
 using UnityEngine;
 using Simpleton;
 
 public abstract partial class MyAiState : SimpletonState
 {
-    public Actor actor;
+    public MonoBehaviour owner;
 }
 ```
 
@@ -26,6 +28,20 @@ SimpletonStateMachine _stateMachine = new CivilianAI( this );
 void InspectorThisAI ()
 {
     SimpletonInspectorWindow.InspectAI( _stateMachine );
+}
+```
+
+## Installation
+Open `Package Manager`->`Add package from git URL`:
+```
+https://github.com/andrew-raphael-lukasik/Simpletons.git#upm
+```
+
+Add this line to the dependencies in `manifest.json`:
+```
+"dependencies": {
+    "com.andrewraphaellukasik.simpletons": "https://github.com/andrew-raphael-lukasik/Simpletons.git#upm",
+    ...
 }
 ```
 
