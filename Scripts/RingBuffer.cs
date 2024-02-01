@@ -27,7 +27,6 @@ namespace Simpleton
         
         public void Push ( T value )
         {
-            Debug.Log($"#{Index} Push( '{value}' )");
             Buffer[ Index++ ] = value;
             if( Index==Capacity ) Index = 0;
             Fill = Mathf.Min( Fill+1 , Capacity );
