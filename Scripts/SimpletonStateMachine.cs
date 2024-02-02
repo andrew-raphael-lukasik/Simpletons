@@ -110,7 +110,7 @@ namespace Simpleton
             {
                 SimpletonState next = search.Dequeue();
 
-                Assert.IsNotNull( next.transitions , $"{GetType().Name}.{nameof(FindAllStates)}(): {nameof(next.transitions)} field for \"{next.GetType().Name}\" state is null" );
+                Assert.IsNotNull( next.transitions , $"{GetType().Name}.{nameof(FindAllStates)}(): {nameof(next.transitions)} field for \"{next.GetType().Name}\" state is null. Make sure transition array is assigned to the state! Inspect code where this state is defined." );
 
                 foreach( SimpletonStateTransition transition in next.transitions )
                 {
