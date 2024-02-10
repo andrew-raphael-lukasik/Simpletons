@@ -13,5 +13,17 @@
     "ai",
     "fsm"
   ],
+  "samples": [
+    {
+      "displayName": "Zombies",
+      "description": "Shows you how to create basic zombie ai",
+      "path": "~Samples/Zombies"
+    },
+	{
+      "displayName": "Traffic lights",
+      "description": "Shows you how to create ai that navigates and reacts to traffic lights.",
+      "path": "~Samples/TrafficLights"
+    }
+  ],
   "hideInEditor": true
 }
