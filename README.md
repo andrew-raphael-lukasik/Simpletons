@@ -4,32 +4,24 @@ A basic state machine for programmers to prototype Unity AI nav agents in C#.
 
 ## Implementation
 
-```cs
-using UnityEngine;
-using Simpleton;
-
-public abstract partial class MyAiState : SimpletonState
-{
-    public MonoBehaviour owner;
-}
-```
-
-It comes with an easy to implement inspector window:
-
-<p float="center">
-    <img src="https://github.com/andrew-raphael-lukasik/Simpletons/assets/3066539/f2c739d3-03d7-4764-9c4c-13270aa9799c" height="300px">
-</p>
+https://github.com/andrew-raphael-lukasik/Simpletons/blob/develop/Samples~/Zombies/Walker/WalkerAI.cs#L16-L95
 
 ```cs
 using Simpletons;
 
-SimpletonStateMachine _stateMachine = new CivilianAI( this );
+[SerializeField] SimpletonStateMachine _brain = new WalkerAI( this );
 
-void InspectorThisAI ()
+void FixedUpdate ()
 {
-    SimpletonInspectorWindow.InspectAI( _stateMachine );
+    _brain.Tick( time:Time.time );
 }
 ```
+
+It comes with an inspector window:
+
+<p float="center">
+    <img src="https://github.com/andrew-raphael-lukasik/Simpletons/assets/3066539/f2c739d3-03d7-4764-9c4c-13270aa9799c" height="300px">
+</p>
 
 ## Installation
 Open `Package Manager`->`Add package from git URL`:
