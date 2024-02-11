@@ -17,12 +17,12 @@
     {
       "displayName": "Zombies",
       "description": "Shows you how to create basic zombie ai",
-      "path": "~Samples/Zombies"
+      "path": "Samples~/Zombies"
     },
 	{
       "displayName": "Traffic lights",
       "description": "Shows you how to create ai that navigates and reacts to traffic lights.",
-      "path": "~Samples/TrafficLights"
+      "path": "Samples~/TrafficLights"
     }
   ],
   "hideInEditor": true
