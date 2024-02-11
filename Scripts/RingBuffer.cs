@@ -1,48 +1,74 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Simpleton
 {
-	[System.Serializable]
-	public class RingBuffer <T> : IEnumerable, IEnumerable<T>
-	{
+    public class RingBuffer <T> : IEnumerable, IEnumerable<T>
+    {
+        
+        public readonly T[] Buffer;
+        public readonly int Capacity;
+        public int Fill;
+        
+        /// <summary> Current index </summary>
+        /// <remarks> (not next one) </remarks>
+        int Index;
 
-		readonly T[] _array;
-		readonly int Length;
-	
-		/// <summary> Current index </summary>
-		/// <remarks> (not next one) </remarks>
-		int _index;
+        [System.Obsolete("Must set capacity",true)]
+        public RingBuffer () {}
+        public RingBuffer ( int capacity )
+        {
+            Buffer = new T[ capacity ];
+            Capacity = capacity;
+            Index = 0;
+            Fill = 0;
+        }
+        
+        public void Push ( T value )
+        {
+            Buffer[ Index++ ] = value;
+            if( Index==Capacity ) Index = 0;
+            Fill = Mathf.Min( Fill+1 , Capacity );
+        }
 
-		[System.Obsolete("don't",true)]
-		public RingBuffer () {}
-		public RingBuffer ( int capacity )
-		{
-			this._array = new T[ capacity ];
-			this.Length = capacity;
-			this._index = 0;
-		}
-	
-		public void Push ( T value )
-		{
-			_array[ _index++ ] = value;
-			if( _index==Length ) _index = 0;
-		}
+        public T Peek () => Buffer[Index];
 
-		public T Peek () => _array[_index];
+        IEnumerator IEnumerable.GetEnumerator ()
+        {
+            int startingIndex = Index - Fill;
+            if( startingIndex<0 ) startingIndex += Fill;
+            int count = 0;
+            for( int i=startingIndex ; i<Capacity && count<Fill ; i++, count++)
+            {
+                yield return Buffer[i>=0?i:Capacity+i];
+            }
+        }
+        IEnumerator<T> IEnumerable<T>.GetEnumerator ()
+        {
+            int startingIndex = Index - Fill;
+            if( startingIndex<0 ) startingIndex += Fill;
+            int count = 0;
+            for( int i=startingIndex ; i<Capacity && count<Fill ; i++, count++)
+            {
+                yield return Buffer[i>=0?i:Capacity+i];
+            }
+        }
 
-		IEnumerator IEnumerable.GetEnumerator ()
-		{
-			for( int i=_index ; i<Length ; i++ ) yield return _array[i];
-			for( int i=0 ; i<_index ; i++ ) yield return _array[i];
-		}
-		IEnumerator<T> IEnumerable<T>.GetEnumerator ()
-		{
-			for( int i=_index ; i<Length ; i++ ) yield return _array[i];
-			for( int i=0 ; i<_index ; i++ ) yield return _array[i];
-		}
+        public T[] ToArray ()
+        {
+            if( Capacity==0 ) return new T[0];
+            T[] output = new T[ Capacity ];
+            int o = 0;
+            int startingIndex = Index - Fill;
+            if( startingIndex<0 ) startingIndex += Fill;
+            int count = 0;
+            for( int i=startingIndex ; i<Capacity && count<Fill ; i++, count++)
+            {
+                output[o++] = Buffer[i>=0?i:Capacity+i];
+            }
+            return output;
+        }
 
-		public T[] AsArray () => _array;
-
-	}
+    }
 }
