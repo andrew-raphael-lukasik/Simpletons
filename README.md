@@ -2,9 +2,9 @@
 
 A basic state machine for programmers to prototype Unity AI nav agents in C#.
 
-## Implementation
+Goal of this repo is to make fsm-based ai creation processs relatively easy and quick so it can be used to prototype ai behaviours.
 
-Goal of this repo is to make fsm-based ai creation processs relatively easy and quick so it can be used to prototype games.
+## Implementation
 
 Samples to show you how to use Simpletons:
 > Zombies and survivors following/avoiding each other
@@ -32,7 +32,7 @@ public class WalkerController : MonoBehaviour
 }
 ```
 
-- custom `SimpletonStateMachine` is a place where you desing your fsm ai
+- custom `SimpletonStateMachine` is a place where you design your fsm ai
 
 ```cs
 public WalkerAI ( WalkerController owner )
