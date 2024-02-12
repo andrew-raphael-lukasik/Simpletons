@@ -32,7 +32,7 @@ public class WalkerController : MonoBehaviour
 }
 ```
 
-- custom `SimpletonStateMachine` is a place where you desing your fsm ai
+- custom `SimpletonStateMachine` is a place where you design your fsm ai
 
 ```cs
 public WalkerAI ( WalkerController owner )
