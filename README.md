@@ -10,12 +10,12 @@ Samples to show you how to use Simpletons:
 > Zombies and survivors following/avoiding each other
 > 
 > https://github.com/andrew-raphael-lukasik/Simpletons/tree/main/Samples/Zombies
->
-> ![GIF 11 02 2024 13-00-52](https://github.com/andrew-raphael-lukasik/Simpletons/assets/3066539/94946da3-957f-48c8-b6a7-7bc529acbfa0)
 
 > pedestrians moving across the street and reacting to traffic lights
 > 
 > https://github.com/andrew-raphael-lukasik/Simpletons/tree/main/Samples/TrafficLights
+>
+> ![GIF 11 02 2024 13-00-52](https://github.com/andrew-raphael-lukasik/Simpletons/assets/3066539/94946da3-957f-48c8-b6a7-7bc529acbfa0)
 
 Key implementation points:
 
