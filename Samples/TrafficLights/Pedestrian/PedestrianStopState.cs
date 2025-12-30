@@ -6,12 +6,12 @@ namespace Simpleton.Samples.Crosswalk
 {
     public class PedestrianStopState : SimpletonState
     {
-        
+
         PedestrianController _owner;
         public bool triggered;
         CrosswalkLights _crosswalkLightsReached;
 
-        public PedestrianStopState ( PedestrianController owner )
+        public PedestrianStopState(PedestrianController owner)
         {
             _owner = owner;
             _owner.onCrosswalkLightsReached += OnCrosswalkLightsReached;
@@ -22,11 +22,11 @@ namespace Simpleton.Samples.Crosswalk
             _owner.onCrosswalkLightsReached -= OnCrosswalkLightsReached;
         }
 
-        public override void OnEnter ( SimpletonState previous , float time )
+        public override void OnEnter(SimpletonState previous, float time)
         {
             // "consume" trigger:
             triggered = false;
-            
+
             // set state time limit
             timeExpectedEnd = time + 300f;
 
@@ -35,20 +35,20 @@ namespace Simpleton.Samples.Crosswalk
             // todo: play stop animation, etc
         }
 
-        public override void OnExit ( SimpletonState next )
+        public override void OnExit(SimpletonState next)
         {
             // reset:
             _crosswalkLightsReached = null;
         }
 
-        public override void Tick ( float time )
+        public override void Tick(float time)
         {
             completed |= _crosswalkLightsReached.state==CrosswalkLights.EState.GO;
         }
 
-        void OnCrosswalkLightsReached ( CrosswalkLights comp )
+        void OnCrosswalkLightsReached(CrosswalkLights comp)
         {
-            if( comp.state!=CrosswalkLights.EState.GO )
+            if (comp.state!=CrosswalkLights.EState.GO)
             {
                 triggered = true;
                 _crosswalkLightsReached = comp;

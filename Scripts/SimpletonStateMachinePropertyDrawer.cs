@@ -1,21 +1,23 @@
 #if UNITY_EDITOR
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEditor;
 
 namespace Simpleton
 {
-    [CustomPropertyDrawer( typeof(SimpletonStateMachine) , useForChildren: true )]
+    [CustomPropertyDrawer(typeof(SimpletonStateMachine), useForChildren: true)]
     public class SimpletonStateMachinePropertyDrawer : PropertyDrawer
     {
-        public override float GetPropertyHeight ( SerializedProperty property , GUIContent label ) => 0;
-        public override void OnGUI ( Rect position , SerializedProperty property , GUIContent label ) //{}
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 0;
+        public override void OnGUI(
+            Rect position,
+            SerializedProperty property,
+            GUIContent label
+        )
         {
-            var stateMachine = fieldInfo.GetValue( property.serializedObject.targetObject ) as SimpletonStateMachine;
+            var stateMachine = fieldInfo.GetValue(property.serializedObject.targetObject) as SimpletonStateMachine;
             GUI.enabled = stateMachine.Initial!=null;
-            if( GUILayout.Button($"Inspect {property.displayName}") )
-                SimpletonInspectorWindow.InspectAI( stateMachine );
+            if (GUILayout.Button($"Inspect {property.displayName}"))
+                SimpletonInspectorWindow.InspectAI(stateMachine);
         }
     }
 }

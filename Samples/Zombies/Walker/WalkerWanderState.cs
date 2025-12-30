@@ -9,17 +9,17 @@ namespace Simpleton.Samples.Zombies
 
         WalkerController _owner;
 
-        public WalkerWanderState ( WalkerController owner )
+        public WalkerWanderState(WalkerController owner)
         {
             _owner = owner;
         }
-        
-        public override void OnEnter ( SimpletonState previous , float time )
+
+        public override void OnEnter(SimpletonState previous, float time)
         {
             // behave
-            if( NavMesh.SamplePosition( _owner.transform.position + new Vector3(Random.Range(-10f,10f),0,Random.Range(-10f,10f)) , out var sample , 10f , ~0 ) )
+            if (NavMesh.SamplePosition(_owner.transform.position + new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f,10f)), out var sample, 10f, ~0))
             {
-                _owner.navMeshAgent.SetDestination( sample.position );
+                _owner.navMeshAgent.SetDestination(sample.position);
                 _owner.navMeshAgent.isStopped = false;
 
                 // set execution time limit
@@ -35,12 +35,12 @@ namespace Simpleton.Samples.Zombies
             // todo: play animation, etc.
         }
 
-        public override void OnExit ( SimpletonState next )
+        public override void OnExit(SimpletonState next)
         {
             
         }
 
-        public override void Tick ( float time )
+        public override void Tick(float time)
         {
             
         }

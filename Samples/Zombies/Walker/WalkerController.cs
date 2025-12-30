@@ -11,55 +11,55 @@ namespace Simpleton.Samples.Zombies
         public int Health = 100;
 
         public NavMeshAgent navMeshAgent;
-        public List<SurvivorController> survivorsAround = new ();
+        public List<SurvivorController> survivorsAround = new();
         public float meleeAttackRange = 1.5f;
 
         [SerializeField] WalkerAI _brain;
 
-        void OnEnable ()
+        void OnEnable()
         {
-            _brain = new WalkerAI( owner:this );
+            _brain = new WalkerAI(owner:this);
             const float tickRate = 1f/3f;
-            InvokeRepeating( nameof(Tick) , Random.Range(0,tickRate) , tickRate );
+            InvokeRepeating(nameof(Tick), Random.Range(0,tickRate), tickRate);
         }
 
-        void OnTriggerEnter ( Collider other )
+        void OnTriggerEnter(Collider other)
         {
-            if( !other.isTrigger && other.TryGetComponent<SurvivorController>(out var comp) && comp.enabled )
+            if (!other.isTrigger && other.TryGetComponent<SurvivorController>(out var comp) && comp.enabled)
             {
-                survivorsAround.Add( comp );
+                survivorsAround.Add(comp);
             }
         }
 
-        void OnTriggerExit ( Collider other )
+        void OnTriggerExit(Collider other)
         {
-            if( other.TryGetComponent<SurvivorController>(out var comp) )
+            if (other.TryGetComponent<SurvivorController>(out var comp))
             {
-                survivorsAround.Remove( comp );
+                survivorsAround.Remove(comp);
             }
         }
 
-        void Tick ()
+        void Tick()
         {
-            _brain.Tick( time:Time.time );
+            _brain.Tick(time:Time.time);
         }
 
         #if UNITY_EDITOR
-        void OnDrawGizmos ()
+        void OnDrawGizmos()
         {
-            if( !Application.isPlaying ) return;
+            if (!Application.isPlaying) return;
 
             GUIStyle style = new GUIStyle();
             style.normal.textColor = Color.yellow;
-            UnityEditor.Handles.Label( transform.position , $"<{_brain?.Current?.GetType().Name}>\nHealth: {Health}%" , style );
+            UnityEditor.Handles.Label(transform.position, $"<{_brain?.Current?.GetType().Name}>\nHealth: {Health}%", style);
 
-            if( survivorsAround.Count!=0 )
+            if (survivorsAround.Count!=0)
             {
-                Vector3 pos = transform.position + new Vector3(0,2,0);
+                Vector3 pos = transform.position + new Vector3(0, 2, 0);
                 Gizmos.color = Color.red;
-                foreach( var next in survivorsAround )
+                foreach (var next in survivorsAround)
                 {
-                    Gizmos.DrawLine( pos , next.transform.position );
+                    Gizmos.DrawLine(pos, next.transform.position);
                 }
             }
         }

@@ -15,36 +15,36 @@ namespace Simpleton.Samples.Crosswalk
 
         [SerializeField] PedestrianAI _brain;
         public event System.Action<CrosswalkLights> onCrosswalkLightsReached;
-        
-        void OnEnable ()
+
+        void OnEnable()
         {
-            _brain = new PedestrianAI( owner:this );
-            if( waypointIndex==-1 ) waypointIndex = Random.Range( 0 , waypoints.Length );
+            _brain = new PedestrianAI(owner:this);
+            if (waypointIndex==-1) waypointIndex = Random.Range(0, waypoints.Length);
             const float tickRate = 1f/3f;
-            InvokeRepeating( nameof(Tick) , Random.Range(0,tickRate) , tickRate );
+            InvokeRepeating(nameof(Tick), Random.Range(0, tickRate), tickRate);
         }
 
-        void OnTriggerEnter ( Collider other )
+        void OnTriggerEnter(Collider other)
         {
-            if( other.TryGetComponent<CrosswalkLights>(out var comp) && comp.enabled )
+            if (other.TryGetComponent<CrosswalkLights>(out var comp) && comp.enabled)
             {
                 onCrosswalkLightsReached(comp);
             }
         }
 
-        void Tick ()
+        void Tick()
         {
-            _brain.Tick( time:Time.time );
+            _brain.Tick(time:Time.time);
         }
 
         #if UNITY_EDITOR
-        void OnDrawGizmos ()
+        void OnDrawGizmos()
         {
-            if( !Application.isPlaying ) return;
+            if (!Application.isPlaying) return;
 
             GUIStyle style = new GUIStyle();
             style.normal.textColor = Color.yellow;
-            UnityEditor.Handles.Label( transform.position , $"<{_brain?.Current?.GetType().Name}>" , style );
+            UnityEditor.Handles.Label(transform.position, $"<{_brain?.Current?.GetType().Name}>", style);
         }
         #endif
 

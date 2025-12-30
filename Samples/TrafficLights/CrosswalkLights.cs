@@ -12,21 +12,21 @@ namespace Simpleton.Samples.Crosswalk
         public EState state => _state;
 
         [SerializeField] Text _text;
-        
-        IEnumerator Start ()
+
+        IEnumerator Start()
         {
-            var switchTime = new WaitForSeconds( 5f );
-            while( true )
+            var switchTime = new WaitForSeconds(5f);
+            while (true)
             {
                 yield return switchTime;
                 
-                if( _state==EState.STOP )
+                if (_state==EState.STOP)
                 {
                     _state = EState.GO;
                     _text.text = nameof(EState.GO);
                     _text.color = Color.green;
                 }
-                else if( _state==EState.GO )
+                else if (_state==EState.GO)
                 {
                     _state = EState.STOP;
                     _text.text = nameof(EState.STOP);
