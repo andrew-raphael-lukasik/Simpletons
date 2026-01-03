@@ -13,121 +13,103 @@ namespace Simpleton
 {
     public class SimpletonInspectorWindow : EditorWindow
     {
+#region fields
+
+
+        SimpletonStateMachine _stateMachine;
+        Dictionary<SimpletonState, SimpletonInspectorNode> _lookupNodes = new();
+
+
+#endregion
+#region create window
+
 
         [MenuItem("Window/"+nameof(Simpleton)+"/"+nameof(SimpletonInspectorWindow))]
         public static void CreateWindow()
-        {
-            (SimpletonState[],SimpletonInspectorNode[],Edge[],string[] logs) rebuild()
-            {
-                var node1 = SimpletonInspectorNode.Factory("node 1", out var ports1, (Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(SimpletonInspectorNode), "input port"));
-                node1.SetPositionCircle(math.PI*2f * 0f/2f);
+            => CreateWindow(null);
 
-                var node2 = SimpletonInspectorNode.Factory("node 2", out var ports2, (Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(SimpletonInspectorNode), "output port"));
-                node2.SetPositionCircle(math.PI*2f * 1f/2f);
-
-                return (new SimpletonState[]{}, new SimpletonInspectorNode[]{ node1, node2 }, new Edge[0]{}, new string[0]);
-            };
-            CreateWindow(rebuild, (map)=>{});
-        }
         public static void CreateWindow(
-            System.Func<(SimpletonState[], SimpletonInspectorNode[], Edge[], string[] logs)> on_rebuild,
-            System.Action<Dictionary<SimpletonState,SimpletonInspectorNode>> on_update
+            SimpletonStateMachine stateMachine
         )
         {
             var window = EditorWindow.GetWindow<SimpletonInspectorWindow>();
             window.titleContent = new GUIContent(nameof(SimpletonInspectorWindow));
-            window.onRebuild = on_rebuild;
-            window.onUpdate = on_update;
-            window.Rebuild();
+            window._stateMachine = stateMachine;
             window.Show();
         }
 
-        event System.Func<(SimpletonState[] states,SimpletonInspectorNode[] nodes,Edge[] edges, string[] logs)> onRebuild;
-        event System.Action<Dictionary<SimpletonState,SimpletonInspectorNode>> onUpdate;
-        Dictionary<SimpletonState,SimpletonInspectorNode> _map = new();
 
-        // void OnEnable() => Rebuild();
+#endregion
+#region unity messages
 
-        void Update()
+
+        void CreateGUI()
         {
-            if (onUpdate!=null && _map!=null)
-                onUpdate(_map);
-        }
+            SimpletonState[] states;
+            SimpletonInspectorNode[] nodes;
+            Edge[] edges;
+            string[] logs;
 
-        void Rebuild()
-        {
-            rootVisualElement.Clear();
-            if (onRebuild!=null)
+            if (_stateMachine!=null)
+                GetGraphData(_stateMachine, out states, out nodes, out edges, out logs);
+            else
+                GetFakeGraphData(out states, out nodes, out edges, out logs);
+
             {
-                var dat = onRebuild();
-                var states = dat.states;
-                var nodes = dat.nodes;
-
                 int numNodes = nodes.Length;
                 int numStates = states.Length;
                 int len = Mathf.Min(numNodes, numStates);
-                
-                _map.Clear();
+
+                _lookupNodes.Clear();
                 for (int i=0 ; i<len ; i++)
-                    _map.Add(dat.states[i], dat.nodes[i]);
-
-                Rebuild(nodes, dat.edges, dat.logs);
+                    _lookupNodes.Add(states[i], nodes[i]);
             }
-            else
-            {
-                _map.Clear();
-                Rebuild(new SimpletonInspectorNode[0]{}, new Edge[0]{}, new string[0]);
-            }
-        }
 
-        void Rebuild(
-            SimpletonInspectorNode[] nodes,
-            Edge[] edges,
-            string[] logs
-        )
-        {
-            var MAIN_VIEW = new VisualElement();
+            rootVisualElement.Clear();
+
+            var mainView = new VisualElement();
             {
-                var style = MAIN_VIEW.style;
+                var style = mainView.style;
                 style.flexGrow = 1;
                 style.flexDirection = FlexDirection.RowReverse;
             }
-            rootVisualElement.Add(MAIN_VIEW);
+            rootVisualElement.Add(mainView);
 
-            var GRAPH_CONTAINER = new VisualElement();
+            var graphContainer = new VisualElement();
             {
-                GRAPH_CONTAINER.style.flexGrow = 1;
-                // BOX.style.minHeight = BOX.style.minWidth = 300f;
+                var style = graphContainer.style;
+                style.flexGrow = 1;
+                // style.minHeight = style.minWidth = 300f;
             }
-            MAIN_VIEW.Add(GRAPH_CONTAINER);
+            mainView.Add(graphContainer);
 
-            var GRAPH = new SimpletonInspectorGraphView();
+            var graphView = new SimpletonInspectorGraphView();
             {
-                //GRAPH.StretchToParentSize();
-                var style = GRAPH.style;
+                //graphView.StretchToParentSize();
+                var style = graphView.style;
                 style.flexGrow = 1;
             }
             {
                 foreach (var node in nodes)
-                    GRAPH.AddElement(node);
-                
+                    graphView.AddElement(node);
+
                 foreach (var edge in edges)
-                    GRAPH.Add(edge);
+                    graphView.Add(edge);
                     // Debug.Log($"Edge <b>{edge.name}</b> connects <b>{edge.output.portName}</b> and <b>{edge.input.portName}</b> ports");
-                
+
                 foreach (var node in nodes)
                 {
                     node.RefreshExpandedState();
                     node.RefreshPorts();
                 }
             }
-            GRAPH_CONTAINER.Add(GRAPH);
+            graphContainer.Add(graphView);
 
-            var LOGS_LIST = new ListView();
+            var logsView = new ListView();
             {
-                var style = LOGS_LIST.style;
+                var style = logsView.style;
                 // style.flexGrow = 1;
-                // style.minHeight = LOGS_LIST.itemHeight * 12;
+                // style.minHeight = logsView.itemHeight * 12;
                 style.minWidth = 200;
                 style.maxWidth = new StyleLength(new Length(50,LengthUnit.Percent));
                 // style.position = Position.Absolute;
@@ -136,112 +118,125 @@ namespace Simpleton
                 style.borderTopWidth = style.borderLeftWidth = style.borderRightWidth = style.borderBottomWidth = 1;
                 style.borderTopColor = style.borderLeftColor = style.borderRightColor = style.borderBottomColor = new Color{ r=0.1f, g=0.1f, b=0.1f, a=1 };;
             }
-            //LOGS_LIST.headerTitle = $"Last Log Messages | Capacity:";
-            //LOGS_LIST.showFoldoutHeader = true;
-            LOGS_LIST.itemsSource = logs;
-            LOGS_LIST.fixedItemHeight = 16;
-            LOGS_LIST.makeItem =()=> new Label();
-            LOGS_LIST.bindItem = (ve,i) => {
+            //logsView.headerTitle = $"Last Log Messages | Capacity:";
+            //logsView.showFoldoutHeader = true;
+            logsView.itemsSource = logs;
+            logsView.fixedItemHeight = 16;
+            logsView.makeItem =()=> new Label();
+            logsView.bindItem = (ve,i) => {
                 var label = (ve as Label);
-                label.text = (string) LOGS_LIST.itemsSource[i];
+                label.text = (string) logsView.itemsSource[i];
                 label.style.backgroundColor = !string.IsNullOrEmpty(label.text) ? Color.HSVToRGB(H:new Random((uint)Mathf.Abs(label.text.GetHashCode())).NextFloat(), S:0.5f, V:0.4f) : new Color{ r=0.2f, g=0.2f, b=0.2f, a=1 };
             };
-            LOGS_LIST.selectionType = SelectionType.Single;
-            MAIN_VIEW.Add(LOGS_LIST);
+            logsView.selectionType = SelectionType.Single;
+            mainView.Add(logsView);
 
-            var TOOLBAR = new Toolbar();
+            var toolbar = new Toolbar();
             {
-                var REFRESH = new ToolbarButton(Rebuild);
-                REFRESH.text = "Refresh ↻";
-                TOOLBAR.Add(REFRESH);
+                var refresh = new ToolbarButton(CreateGUI);
+                refresh.text = "Refresh ↻";
+                toolbar.Add(refresh);
             }
-            rootVisualElement.Add(TOOLBAR);
+            rootVisualElement.Add(toolbar);
         }
 
-        public static void InspectAI(SimpletonStateMachine stateMachine)
+        void Update()
         {
-            if (stateMachine==null)
+            foreach (var (state, node) in _lookupNodes)
             {
-                Debug.LogError($"{nameof(stateMachine)} is null");
-                return;
+                var style = node.style;
+                if (state!=_stateMachine.Current)
+                {
+                    style.borderTopWidth = style.borderBottomWidth = 0;
+                }
+                else
+                {
+                    style.borderTopWidth = style.borderBottomWidth = 2;
+                    style.borderTopLeftRadius = style.borderTopRightRadius = 6;
+                    style.borderTopColor = style.borderBottomColor = Color.yellow;
+                    style.borderBottomLeftRadius = style.borderBottomRightRadius= 12;
+                }
+            }
+        }
+
+
+#endregion
+#region private methods
+
+
+        static void GetFakeGraphData(
+            out SimpletonState[] states,
+            out SimpletonInspectorNode[] nodes,
+            out Edge[] edges,
+            out string[] logs
+        )
+        {
+            var node1 = SimpletonInspectorNode.Factory("node 1", out var ports1, (Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(SimpletonInspectorNode), "input port"));
+            node1.SetPositionCircle(math.PI*2f * 0f/2f);
+            var node2 = SimpletonInspectorNode.Factory("node 2", out var ports2, (Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(SimpletonInspectorNode), "output port"));
+            node2.SetPositionCircle(math.PI*2f * 1f/2f);
+            nodes = new SimpletonInspectorNode[]{node1, node2};
+
+            states = new SimpletonState[]{};
+            edges = new Edge[0]{};
+            logs = new string[0];
+        }
+
+        static void GetGraphData(
+            SimpletonStateMachine stateMachine,
+            out SimpletonState[] states,
+            out SimpletonInspectorNode[] nodes,
+            out Edge[] edges,
+            out string[] logs
+        )
+        {
+            logs = stateMachine.DebugLogs.ToArray();
+            var stateSet = stateMachine.FindAllStates();
+            states = new SimpletonState[ stateSet.Count ];
+            nodes = new SimpletonInspectorNode[ stateSet.Count ];;
+            var stateNodePorts = new Dictionary<SimpletonState,(SimpletonInspectorNode node,Port[] ports)>();
+            {
+                int i = 0;
+                foreach (var state in stateSet)
+                {
+                    SimpletonInspectorNode.Factory(state, out var node, out var ports);
+                    node.SetPositionCircle(math.PI*2f * ((float)i/(float)stateSet.Count));
+                    states[i] = state;
+                    nodes[i] = node;
+                    stateNodePorts.Add(state, (node, ports));
+                    i++;
+                }
             }
 
-            CreateWindow(
-                on_rebuild:() =>
-                {
-                    var stateSet = stateMachine.FindAllStates();
-                    var states = new SimpletonState[ stateSet.Count ];
-                    var nodes = new SimpletonInspectorNode[ stateSet.Count ];;
-                    var stateNodePorts = new Dictionary<SimpletonState,(SimpletonInspectorNode node,Port[] ports)>();
-                    {
-                        int i = 0;
-                        foreach (var state in stateSet)
-                        {
-                            SimpletonInspectorNode.Factory(state, out var node, out var ports);
-                            node.SetPositionCircle(math.PI*2f * ((float)i/(float)stateSet.Count));
-                            states[i] = state;
-                            nodes[i] = node;
-                            stateNodePorts.Add(state, (node, ports));
-                            i++;
-                        }
-                    }
+            // foreach (var kv in stateNodePorts)
+            //     Debug.Log($"State <b>{kv.Key.name}</b> created <b>{kv.Value.node.title}</b> node with {kv.Value.ports.Length} ports");
 
-                    // foreach (var kv in stateNodePorts)
-                    //     Debug.Log($"State <b>{kv.Key.name}</b> created <b>{kv.Value.node.title}</b> node with {kv.Value.ports.Length} ports");
+            var edgeList = new List<Edge>(capacity: nodes.Length * 2);
+            foreach (var (srcState, srcNodePorts) in stateNodePorts)
+            for (int i=0 ; i<srcState.transitions.Length ; i++)
+            {
+                var srcNodeOutput = srcNodePorts.ports[1+i];
+                var srcNodeTransition = srcState.transitions[i];
 
-                    var edges = new List<Edge>(capacity: nodes.Length * 2);
-                    foreach (var srcState in stateNodePorts.Keys)
-                    {
-                        var srcNodePorts = stateNodePorts[srcState];
-                        for (int i=0 ; i<srcState.transitions.Length ; i++)
-                        {
-                            var srcNodeOutput = srcNodePorts.ports[1+i];
-                            var srcNodeTransition = srcState.transitions[i];
+                var dstState = srcNodeTransition.destination;
+                var dstNodeInput = stateNodePorts[dstState].ports[0];
 
-                            var dstState = srcNodeTransition.destination;
-                            var dstNodeInput = stateNodePorts[dstState].ports[0];
+                // Debug.Log($"State <b>{srcState.name}</b> transitions to <b>{dstState.name}</b> via <b>{srcNodeTransition.name}</b> transition");
+            
+                var edge = srcNodeOutput.ConnectTo(dstNodeInput);
+                edge.name = srcNodeTransition.label;
+                edgeList.Add(edge);
 
-                            // Debug.Log($"State <b>{srcState.name}</b> transitions to <b>{dstState.name}</b> via <b>{srcNodeTransition.name}</b> transition");
-                        
-                            var edge = srcNodeOutput.ConnectTo(dstNodeInput);
-                            edge.name = srcNodeTransition.label;
-                            edges.Add(edge);
-
-                            // Debug.Log($"\tEdge <b>{edge.name}</b> will connect <b>{edge.output.node.title}.{edge.output.portName}</b> and <b>{edge.input.node.title}.{edge.input.portName}</b> ports");
-                        }
-                    }
-                
-                    return (states, nodes, edges.ToArray(), stateMachine.DebugLogs.ToArray());
-                } ,
-                on_update: (stateNodes) =>
-                {
-                    foreach (var kv in stateNodes)
-                    {
-                        var state = kv.Key;
-                        var node = kv.Value;
-                        var style = node.style;
-                        if (state!=stateMachine.Current)
-                        {
-                            style.borderTopWidth = 0;
-                            style.borderBottomWidth = 0;
-                        }
-                        else
-                        {
-                            var col = Color.yellow;
-                            style.borderTopWidth = 2;
-                            style.borderTopLeftRadius = 6;
-                            style.borderTopRightRadius = 6;
-                            style.borderTopColor = col;
-                            style.borderBottomWidth = 2;
-                            style.borderBottomLeftRadius = 12;
-                            style.borderBottomRightRadius = 12;
-                            style.borderBottomColor = col;
-                        }
-                    }
-                }
-            );
+                // Debug.Log($"\tEdge <b>{edge.name}</b> will connect <b>{edge.output.node.title}.{edge.output.portName}</b> and <b>{edge.input.node.title}.{edge.input.portName}</b> ports");
+            }
+            edges = edgeList.ToArray();
         }
+
+
+#endregion
     }
+#region other types
+
 
     public class SimpletonInspectorGraphView : GraphView
     {
@@ -269,13 +264,13 @@ namespace Simpleton
     public class SimpletonInspectorNode : Node
     {
         public static SimpletonInspectorNode Factory(
-            string node_title ,
-            out Port[] ports ,
-            params (Orientation orientation, Direction direction, Port.Capacity capacity, System.Type type, string port_name)[] port_templates
+            string node_title,
+            out Port[] ports,
+            params (Orientation orientation, Direction direction, Port.Capacity capacity, System.Type type, string label)[] port_templates
         )
         {
             var node = new SimpletonInspectorNode{
-                title    = node_title ,
+                title    = node_title,
             };
             {
                 ports = new Port[ port_templates.Length ];
@@ -283,9 +278,9 @@ namespace Simpleton
                 {
                     var IN = port_templates[i];
                     var port = node.InstantiatePort(IN.orientation, IN.direction, IN.capacity, IN.type);
-                    port.portName = IN.port_name;
+                    port.portName = IN.label;
                     if (IN.direction==Direction.Output)
-                        port.portColor = Color.HSVToRGB(H:new Random((uint)Mathf.Abs(IN.port_name.GetHashCode())).NextFloat(), S:0.5f, V:1);
+                        port.portColor = Color.HSVToRGB(H:new Random((uint)Mathf.Abs(IN.label.GetHashCode())).NextFloat(), S:0.5f, V:1);
                     node.outputContainer.Add(port);
                     ports[i] = port;
                 }
@@ -293,12 +288,12 @@ namespace Simpleton
             return node;
         }
         public static SimpletonInspectorNode Factory(
-            string node_title ,
-            out Port[] ports ,
-            params (bool vertical, bool output, bool multi, System.Type type, string port_name)[] port_templates
+            string node_title,
+            out Port[] ports,
+            params (bool vertical, bool output, bool multi, System.Type type, string label)[] port_templates
         )
         {
-            var arr = new (Orientation orientation, Direction direction, Port.Capacity capacity, System.Type type, string port_name)[ port_templates.Length ];
+            var arr = new (Orientation orientation, Direction direction, Port.Capacity capacity, System.Type type, string label)[ port_templates.Length ];
             if (port_templates.Length!=0)
             for (int i=0 ; i<port_templates.Length ; i++)
             {
@@ -308,7 +303,7 @@ namespace Simpleton
                 next.direction      = template.output   ? Direction.Output      : Direction.Input;
                 next.capacity       = template.multi    ? Port.Capacity.Multi   : Port.Capacity.Single;
                 next.type           = template.type;
-                next.port_name      = template.port_name;
+                next.label      = template.label;
             }
             return Factory(node_title, out ports, arr);
         }
@@ -334,22 +329,7 @@ namespace Simpleton
 
     }
 
-    // public class SimpletonInspectorPort : Port
-    // {
-    //     public SimpletonInspectorPort(
-    //         Orientation portOrientation,
-    //         Direction portDirection,
-    //         Capacity portCapacity,
-    //         System.Type type
-    //     )
-    //         : base(
-    //             portOrientation,
-    //             portDirection,
-    //             portCapacity,
-    //             type
-    //         )
-    //     {}
-    // }
 
+#endregion
 }
 #endif

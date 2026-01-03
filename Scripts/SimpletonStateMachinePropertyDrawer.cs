@@ -17,7 +17,7 @@ namespace Simpleton
             var stateMachine = fieldInfo.GetValue(property.serializedObject.targetObject) as SimpletonStateMachine;
             GUI.enabled = stateMachine.Initial!=null;
             if (GUILayout.Button($"Inspect {property.displayName}"))
-                SimpletonInspectorWindow.InspectAI(stateMachine);
+                SimpletonInspectorWindow.CreateWindow(stateMachine);
         }
     }
 }
